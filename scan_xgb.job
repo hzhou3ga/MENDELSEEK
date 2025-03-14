@@ -1,0 +1,91 @@
+#!/bin/tcsh -f 
+
+
+set src0=$LIU
+
+set i=1
+lpi:
+
+set me=$1
+if ( $1 == "" ) exit 
+set ii=$2
+
+
+set mydir=`pwd`
+
+
+set ss=`echo $src0 | awk '{print substr($1,1,1)}'`
+if ( $ss != "/" && $ss != "\" ) set src0=$mydir"/"$src0
+
+echo $src0
+
+set src2=$src0
+
+set workdir=/tmp/${USER}/${PBS_JOBID}/$me
+
+if ( ! -e $workdir )  mkdir -p $workdir
+
+cd  $workdir 
+
+cp -u    $mydir/XGB*py .
+set feaf=hippie_string0.5_interactome_gn_path_goproc_plm_entave_fea.txt
+set npp=0
+if ( -e mydir/$feaf ) then
+set npp=`wc -l  mydir/$feaf  | awk '{print $1}'`
+endif 
+if ( $npp > 10000 ) goto ntt1 
+ 
+if ( -e $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_1_fea.txt.gz ) then
+gzip -d -f $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_1_fea.txt.gz 
+endif 
+cat $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_1_fea.txt >! $mydir/$feaf
+if ( -e $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_2_fea.txt.gz ) then
+gzip -d -f $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_2_fea.txt.gz 
+endif 
+cat $mydir/hippie_string0.5_interactome_gn_path_goproc_plm_entave_2_fea.txt >> $mydir/$feaf
+set npp=`wc -l $mydir/$feaf | awk '{print $1}'`
+echo $npp 
+if ( $npp != 17858 ) then
+echo "Something wrong with feature file, check your downloads "
+echo "if there are files: hippie_string0.5_interactome_gn_path_goproc_plm_entave_1_fea.txt.gz hippie_string0.5_interactome_gn_path_goproc_plm_entave_2_fea.txt.gz "
+exit 
+endif 
+
+ntt1:
+
+if ( $ii != 0 ) then
+awk 'BEGIN{srand(1);x1=('$ii'-1)*0.1;x2=x1+0.1}{x=rand();if(x1<=x&&x<=x2) print $0}' <$mydir/$feaf > ! test_fea.txt
+awk 'BEGIN{srand(1);x1=('$ii'-1)*0.1;x2=x1+0.1}{x=rand();if(x1>x||x>x2){print $0}}' <$mydir/$feaf > ! train_fea.txt
+#awk 'BEGIN{srand(1);x1=('$ii'-1)*0.1;x2=x1+0.1}{x=rand();if(x1>x||x>x2){print $0}}' <$mydir/$feaf > ! tr_fea.txt
+#awk '{if($1>0){c1=$2;c2=$22;for(m=2;m<=20;m++){c1=c1 " " $(m+1);c2=c2 " " $(m+21)};for(l=1;l<=10;l++) {print $0;print $1,c2,c1,"#", $NF,$(NF-1)}\
+#}else{x=rand();if(x<0.1){c1=$2;c2=$22;for(m=2;m<=20;m++){c1=c1 " " $(m+1);c2=c2 " " $(m+21)}; print $0;print $1,c2,c1,"#", $NF,$(NF-1)}}}' <tr_fea.txt >! train_fea.txt
+else
+cat $mydir/$feaf > ! test_fea.txt
+cat $mydir/$feaf > ! train_fea.txt
+endif
+
+
+wc -l train_fea.txt  test_fea.txt 
+
+
+awk '{c=$1;for(l=1;l<=NF-3;l++) c=c " " l":" $(l+1);print c}'<train_fea.txt >! train_svmfea.txt
+awk '{c=$1;for(l=1;l<=NF-3;l++) c=c " " l":" $(l+1);print c}'<test_fea.txt  >! test_svmfea.txt
+
+if ( ! -e model ) mkdir model
+if ( ! -e pred ) mkdir pred
+#/local/images/anaconda2_4.4.0/bin/python XGB_train.py 
+#/local/images/anaconda2_4.4.0/bin/python XGB_test.py
+$PYTH XGB_train.py
+$PYTH XGB_test.py
+
+paste  pred/test_pred.txt  test_fea.txt | awk '{print $2,$1,$NF}' >! xgb.txt 
+
+cp -u xgb.txt $mydir/$me
+
+
+cd $mydir
+sleep 1
+
+rm -irf $workdir 
+
+

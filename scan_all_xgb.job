@@ -1,0 +1,79 @@
+#!/bin/tcsh -f  
+
+
+setenv PYTH /local/images/anaconda2_4.4.0/bin/python
+
+set mmm=$0:r
+set ddd=`echo 1 | awk 'BEGIN{cc="'$mmm'"}{for(l=1;l<=length(cc);l++) if(substr(cc,l,1)=="/") ip=l}END{print substr(cc,1,ip-1)}'`
+
+set lst=$1
+if ( $lst == "" ) set lst=all_run.lst 
+
+
+set i=1
+#set i=0
+lpi:
+
+if ( $i == 0 ) then
+set me0="rand0"
+else
+set me0=`head -$i $lst  | tail -1 | awk '{print $1}'`
+endif 
+
+set jj=1
+#set jj=2
+lpjj:
+set out=$me0/xgb.txt
+
+if ( ! -e $me0 ) mkdir $me0 
+if (  -e $out  ) then
+set nn=`wc -l $out | awk '{print $1}'`
+#rm -if $out 
+#if ( $nn > 0 ) goto ok1
+else 
+endif 
+
+
+echo  $i  $me0    $jj
+
+
+set job=/tmp/${USER}/myxgb_omim.job
+if ( ! -e /tmp/${USER} ) mkdir -p /tmp/${USER} 
+
+set jbn=X${me0}XGB"_"omim
+#set ls=`grep $jbn jbr_c | wc -l | awk '{print $1}'`
+#if ( $ls > 0 ) goto ok1
+
+
+set mydir=`pwd`
+
+
+echo "#\!/bin/tcsh -f " > ! $job
+echo "#PBS -d /tmp/${USER}  " >> $job
+echo "#PBS -e $mydir " >> $job
+echo "#PBS -l qos=batch " >> $job
+echo "#PBS -N $jbn " >> $job
+echo " " >> $job
+echo "setenv LIU $ddd " >> $job 
+echo "set rundir=$mydir " >> $job
+echo "cd  $mydir " >> $job 
+echo "$ddd/scan_xgb.job $me0 $i  " >> $job 
+chmod a+x $job 
+
+echo "run ..."
+setenv PBS_JOBID testtreexgb
+$job 
+#exit
+
+#$ddd/subme_h_nocasp_nopersonal_big.job $job  $jbn  196
+sleep 1
+
+ok1:
+
+
+@ jj = $jj + 1
+#if ( $jj <= 10 ) goto lpjj 
+
+@ i = $i + 1
+if ( $i <= 10 ) goto lpi
+

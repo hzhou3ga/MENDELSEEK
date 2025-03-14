@@ -1,0 +1,29 @@
+#!/bin/tcsh -f 
+
+set dat=hippie_string0.5_interactome_gn_path_goproc_plm_entave_fea.txt
+set pafea=hippie_string0.5_interactome_gn_path_fea.txt
+set gofea=hippie_string0.5_interactome_gn_goproc_fea.txt
+set dat0=$dat:r:t
+set pafea0=$pafea:r:t
+set gofea0=$gofea:r:t
+
+# get feature for  pathways
+if ( ! -e $pafea && -e $dat  ) then
+awk '{c=$1;for(l=1;l<=2364;l++) c=c " " $(l+1);print c,"#",$NF}' <$dat >! $pafea 
+endif 
+# get feature for  Go process 
+if ( ! -e $gofea && -e $dat ) then
+awk '{c=$1;for(l=1;l<=12536;l++) c=c " " $(l+1+2364);print c,"#",$NF}' <$dat >! $gofea 
+endif 
+
+if ( ! -e $pafea0"_tv.txt" ) then
+cat $pafea  | awk '{for(l=2;l<=NF-2;l++){if($1>0){i[l]=i[l]+1;x[l]=x[l]+$l;y[l]=y[l]+$l*$l}else{j[l]=j[l]+1;u[l]=u[l]+$l;v[l]=v[l]+$l*$l}}}END{for(l=2;l<=NF-2;l++)if(i[l]>0&&j[l]>0){a[l]=x[l]/i[l];sa[l]=sqrt(y[l]/i[l]-a[l]*a[l]);b[l]=u[l]/j[l];sb[l]=sqrt(v[l]/j[l]-b[l]*b[l]);sp=sqrt((sa[l]*sa[l]*(i[l]-1)+sb[l]*sb[l]*(j[l]-1))/(i[l]+j[l]-2));se=sp*sqrt(1/i[l]+1/j[l]);if(se>0) print l,(a[l]-b[l])/se}}' >! $pafea0"_tv.txt"
+endif
+
+cat CTD_pathways.txt  $pafea0"_tv.txt" | awk '{i=i+1;if(i<=2363){t[i]=$0}else{j=j+1;if(j==1) print $2,"number of pathways";if(j>1) print $2,t[$1-2]}}' | sort -gr -k1  >! path_tv_name.txt
+
+if ( ! -e  $gofea0"_tv.txt" ) then
+cat $gofea  | awk '{for(l=2;l<=NF-2;l++){if($1>0){i[l]=i[l]+1;x[l]=x[l]+$l;y[l]=y[l]+$l*$l}else{j[l]=j[l]+1;u[l]=u[l]+$l;v[l]=v[l]+$l*$l}}}END{for(l=2;l<=NF-2;l++)if(i[l]>0&&j[l]>0){a[l]=x[l]/i[l];sa[l]=sqrt(y[l]/i[l]-a[l]*a[l]);b[l]=u[l]/j[l];sb[l]=sqrt(v[l]/j[l]-b[l]*b[l]);sp=sqrt((sa[l]*sa[l]*(i[l]-1)+sb[l]*sb[l]*(j[l]-1))/(i[l]+j[l]-2));se=sp*sqrt(1/i[l]+1/j[l]);if(se>0) print l,(a[l]-b[l])/se}}' >! $gofea0"_tv.txt"
+endif
+
+cat human_go.obo_bioprocess   $gofea0"_tv.txt" | awk '{i=i+1;if(i<=12535){t[i]=$0}else{j=j+1;if(j==1) print $2,"number of GO processes";if(j>1) print $2,t[$1-2]}}' |sort -gr -k1  >! goproc_tv_name.txt
