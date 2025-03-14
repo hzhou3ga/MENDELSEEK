@@ -1,5 +1,7 @@
 requires linux/unix OS
 
+python package
+sklearn
 
 for example to install 
 conda install -c anaconda scikit-learn
