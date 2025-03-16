@@ -23,10 +23,16 @@ then
 
 It will take some time  to finish.
 the output will be in directores "rand1" to "rand10"
+
+get all predictions:
+./scan_all_xgb_kn.job
+
 check the output against
 
 all_xgb_0.txt
 
+Note taht one can not reproduce the exact number of each gene's raw score, because there is rand number generation involved. 
+But, the correlation between different run should > 0.99
 
 For unpaired t-test analysis:
 ./scan_tv.job 

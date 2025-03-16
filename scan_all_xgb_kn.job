@@ -1,0 +1,40 @@
+#!/bin/tcsh -f  
+
+
+set mmm=$0:r
+set ddd=`echo 1 | awk 'BEGIN{cc="'$mmm'"}{for(l=1;l<=length(cc);l++) if(substr(cc,l,1)=="/") ip=l}END{print substr(cc,1,ip-1)}'`
+
+set lst=$1
+if ( $lst == "" ) set lst=all_run.lst 
+
+
+set i=1
+lpi:
+
+if ( $i == 0 ) then
+set me0="rand0"
+else
+set me0=`head -$i $lst  | tail -1 | awk '{print $1}'`
+endif 
+
+set jj=1
+#set jj=2
+lpjj:
+set out=$me0/xgb.txt
+
+if (  -e $out  ) then
+cat $out
+else 
+goto ok1
+endif 
+
+
+ok1:
+
+
+@ jj = $jj + 1
+#if ( $jj <= 10 ) goto lpjj 
+
+@ i = $i + 1
+if ( $i <= 10 ) goto lpi
+
