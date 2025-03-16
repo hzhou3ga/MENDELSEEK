@@ -22,6 +22,7 @@ then
 ./scan_all_xgb.job
 
 It will take some time  to finish.
+Single node CPU: around 2 days. 
 the output will be in directores "rand1" to "rand10"
 
 get all predictions:
