@@ -21,27 +21,27 @@ setenv PYTH to your python version that has scikit-learn installed.
 then 
 ./scan_all_xgb.job
 
-it will take some time  to finish.
-single node CPU: around 2 days. 
+It will take some time  to finish.
 the output will be in directores "rand1" to "rand10"
-
-get all predictions:
-./scan_all_xgb_kn.job
-
 check the output against
 
 all_xgb_0.txt
 
-note taht one can not reproduce the exact number of each gene's raw score, because there is rand number generation involved. 
-but, the correlation between different run should > 0.99
 
-for unpaired t-test analysis:
-./scan_tv.job 
+For Mann-Whitney U-test z-score calculation:
+
+1. compile source file: 
+
+f77 -o calutestz -mcmodel=medium calutestz.f
+
+2. run: 
+./scan_zv.job 
+
 output: 
-path_tv_name.txt 
-goproc_tv_name.txt 
+path_zv_name.txt 
+goproc_zv_name.txt 
 
 check output against 
-path_tv_name_0.txt  
-goproc_tv_name_0.txt
+path_zv_name_0.txt  
+goproc_zv_name_0.txt
 

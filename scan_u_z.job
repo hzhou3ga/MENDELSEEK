@@ -1,0 +1,27 @@
+#!/bin/tcsh -f 
+
+
+set in=$1
+
+if ( $1 == "" ) exit
+
+set np=`head -1 $in | awk '{print NF-2}'`
+rm -if _zz.txt 
+set in0=$in:r:t
+echo $in0
+
+set i=2
+lpi:
+
+awk 'BEGIN{ii='$i'}{print $1,$ii}'<$in | sort -gr -k2 >! _xx
+
+set zz=`./calutestz<_xx`
+
+echo $i $zz
+echo $i $zz >> _zz.txt 
+
+
+@ i = $i + 1
+if ( $i <= $np ) goto lpi
+
+mv -f _zz.txt $in0"_zv.txt"
