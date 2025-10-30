@@ -30,8 +30,8 @@ cd  $workdir
 cp -u    $mydir/XGB*py .
 set feaf=hippie_string0.5_interactome_gn_path_goproc_plm_entave_fea.txt
 set npp=0
-if ( -e mydir/$feaf ) then
-set npp=`wc -l  mydir/$feaf  | awk '{print $1}'`
+if ( -e $mydir/$feaf ) then
+set npp=`wc -l  $mydir/$feaf  | awk '{print $1}'`
 endif 
 if ( $npp > 10000 ) goto ntt1 
  
